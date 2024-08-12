@@ -4,7 +4,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './schemas/user.schema';
 import { Model } from 'mongoose';
-import { genSaltSync, hashSync } from 'bcryptjs';
+import { compareSync, genSaltSync, hashSync } from 'bcryptjs';
 
 @Injectable()
 export class UsersService {
@@ -39,15 +39,28 @@ export class UsersService {
       return 'Not found user';
     }
   }
+  findOneByUsername(username: string) {
+    return this.userModel.findOne({ email: username });
+  }
 
   async update(updateUserDto: UpdateUserDto) {
     return await this.userModel.updateOne(
-      { _id: updateUserDto._id },
+      { id: updateUserDto._id },
       { ...updateUserDto },
     );
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  remove(id: string) {
+    if (id.match(/^[0-9a-fA-F]{24}$/)) {
+      return this.userModel.deleteOne({
+        _id: id,
+      });
+    } else {
+      return 'Not found user';
+    }
+  }
+
+  isValidPassword(password: string, hashPassword: string) {
+    return compareSync(password, hashPassword);
   }
 }
