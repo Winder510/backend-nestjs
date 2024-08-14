@@ -50,8 +50,6 @@ var mongoose_1 = require("@nestjs/mongoose");
 var config_1 = require("@nestjs/config");
 var users_module_1 = require("./users/users.module");
 var auth_module_1 = require("./auth/auth.module");
-var core_1 = require("@nestjs/core");
-var jwt_auth_guard_1 = require("./auth/jwt-auth.guard");
 var soft_delete_plugin_mongoose_1 = require("soft-delete-plugin-mongoose");
 var AppModule = /** @class */ (function () {
     function AppModule() {
@@ -83,10 +81,6 @@ var AppModule = /** @class */ (function () {
             controllers: [app_controller_1.AppController],
             providers: [
                 app_service_1.AppService,
-                {
-                    provide: core_1.APP_GUARD,
-                    useClass: jwt_auth_guard_1.JwtAuthGuard
-                },
             ]
         })
     ], AppModule);
