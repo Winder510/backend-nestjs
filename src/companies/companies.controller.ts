@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Request,
+  Query,
 } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
@@ -24,8 +25,13 @@ export class CompaniesController {
   }
 
   @Get()
-  findAll(@Request() req) {
-    return this.companiesService.findAll();
+  findAll(
+    @Query('page') page: string,
+    @Query('limit') limit: string,
+    @Query() qs: string,
+  ) {
+    // const page = req.querry.page;
+    return this.companiesService.findAll(+page, +limit, qs);
   }
 
   @Get(':id')
