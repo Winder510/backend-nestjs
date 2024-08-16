@@ -6,6 +6,7 @@ import { User, UserDocument } from './schemas/user.schema';
 import { Model } from 'mongoose';
 import { compareSync, genSaltSync, hashSync } from 'bcryptjs';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+import { IUser } from './users.interface';
 
 @Injectable()
 export class UsersService {
@@ -53,11 +54,15 @@ export class UsersService {
     );
   }
 
-  remove(id: string) {
+  async remove(id: string, user: IUser) {
     if (id.match(/^[0-9a-fA-F]{24}$/)) {
-      return this.userModel.deleteOne({
-        _id: id,
-      });
+      await this.userModel.updateOne(
+        { _id: id },
+        {
+          deletedBy: { _id: user._id, email: user.email },
+        },
+      );
+      return this.userModel.softDelete({ _id: id });
     } else {
       return 'Not found user';
     }

@@ -42,7 +42,17 @@ export class CompaniesService {
     }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} company`;
+  async remove(id: string, user: IUser) {
+    if (id.match(/^[0-9a-fA-F]{24}$/)) {
+      await this.companyModel.updateOne(
+        { _id: id },
+        {
+          deletedBy: { _id: user._id, email: user.email },
+        },
+      );
+      return this.companyModel.softDelete({ _id: id });
+    } else {
+      return 'Not found company';
+    }
   }
 }
