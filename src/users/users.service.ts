@@ -25,7 +25,7 @@ export class UsersService {
       ...createUserDto,
       password: hashPassword,
     });
-    console.log(data);
+
     return data;
   }
 
