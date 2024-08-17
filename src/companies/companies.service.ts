@@ -27,7 +27,7 @@ export class CompaniesService {
 
     delete filter.page;
     delete filter.limit;
-    console.log(filter);
+
     let offset = (+page - 1) * +limit;
     let defaultLimit = +limit ? +limit : 10;
 
@@ -42,8 +42,6 @@ export class CompaniesService {
       .sort(sort)
       .populate(population)
       .exec();
-
-    console.log(result);
     return {
       meta: {
         current: page, //trang hiện tại
