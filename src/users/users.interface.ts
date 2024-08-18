@@ -4,3 +4,11 @@ export interface IUser {
   email: string;
   role: string;
 }
+export interface IUserRegister {
+  name: string;
+  email: string;
+  password: string;
+  age: string;
+  gender: string;
+  address: string;
+}

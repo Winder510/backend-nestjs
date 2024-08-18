@@ -1,12 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateUserDto, RegisterUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './schemas/user.schema';
 import { Model } from 'mongoose';
 import { compareSync, genSaltSync, hashSync } from 'bcryptjs';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUser } from './users.interface';
+import aqp from 'api-query-params';
 
 @Injectable()
 export class UsersService {
@@ -20,25 +21,89 @@ export class UsersService {
     return hash;
   };
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto, user: IUser) {
     const hashPassword = this.getHashPassword(createUserDto.password);
+    const isExistEmail = await this.userModel.findOne({
+      email: createUserDto.email,
+    });
+    if (isExistEmail) {
+      throw new BadRequestException(`Email: ${createUserDto.email} đã tồn tại`);
+    }
     let data = await this.userModel.create({
       ...createUserDto,
       password: hashPassword,
+      createdBy: {
+        _id: user._id,
+        email: user.email,
+      },
     });
 
-    return data;
+    return {
+      _id: data._id,
+      createdAt: data.createdAt,
+    };
+  }
+  async register(registerUserDto: RegisterUserDto) {
+    const hashPassword = this.getHashPassword(registerUserDto.password);
+    const isExistEmail = await this.userModel.findOne({
+      email: registerUserDto.email,
+    });
+    if (isExistEmail) {
+      throw new BadRequestException(
+        `Email: ${registerUserDto.email} đã tồn tại`,
+      );
+    }
+    let data = await this.userModel.create({
+      ...registerUserDto,
+      role: 'USER',
+      password: hashPassword,
+    });
+
+    return {
+      _id: data._id,
+      createdAt: data.createdAt,
+    };
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll(page: number, limit: number, qs: string) {
+    const { filter, sort, population } = aqp(qs);
+
+    delete filter.page;
+    delete filter.limit;
+
+    let offset = (+page - 1) * +limit;
+    let defaultLimit = +limit ? +limit : 10;
+
+    const totalItems = (await this.userModel.find(filter)).length;
+    const totalPages = Math.ceil(totalItems / defaultLimit);
+
+    const result = await this.userModel
+      .find(filter)
+      .skip(offset)
+      .limit(defaultLimit)
+      // @ts-ignore: Unreachable code error
+      .sort(sort)
+      .populate(population)
+      .exec();
+    return {
+      meta: {
+        current: page, //trang hiện tại
+        pageSize: limit, //số lượng bản ghi đã lấy
+        pages: totalPages, //tổng số trang với điều kiện query
+        total: totalItems, // tổng số phần tử (số bản ghi)
+      },
+      result, //kết quả query
+    };
   }
 
-  findOne(id: string) {
+  async findOne(id: string) {
     if (id.match(/^[0-9a-fA-F]{24}$/)) {
-      return this.userModel.findOne({
-        _id: id,
-      });
+      let user = await this.userModel
+        .findOne({
+          _id: id,
+        })
+        .select('-password');
+      return user;
     } else {
       return 'Not found user';
     }
@@ -47,10 +112,16 @@ export class UsersService {
     return this.userModel.findOne({ email: username });
   }
 
-  async update(updateUserDto: UpdateUserDto) {
+  async update(updateUserDto: UpdateUserDto, user: IUser) {
     return await this.userModel.updateOne(
       { id: updateUserDto._id },
-      { ...updateUserDto },
+      {
+        ...updateUserDto,
+        updatedBy: {
+          _id: user._id,
+          email: user.email,
+        },
+      },
     );
   }
 
@@ -71,4 +142,12 @@ export class UsersService {
   isValidPassword(password: string, hashPassword: string) {
     return compareSync(password, hashPassword);
   }
+  updateUserToken = async (refreshToken: string, _id: string) => {
+    return await this.userModel.updateOne(
+      { _id },
+      {
+        refreshToken,
+      },
+    );
+  };
 }
