@@ -28,7 +28,8 @@ async function bootstrap() {
   });
 
   app.enableCors({
-    origin: '*',
+    credentials: true,
+    origin: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     preflightContinue: false,
     optionsSuccessStatus: 204,
