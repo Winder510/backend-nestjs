@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { Company, CompanyDocument } from './schemas/company.schema';
@@ -7,6 +7,7 @@ import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { User } from 'src/decorator/customize';
 import { IUser } from 'src/users/users.interface';
 import aqp from 'api-query-params';
+import mongoose from 'mongoose';
 @Injectable()
 export class CompaniesService {
   constructor(
@@ -53,12 +54,19 @@ export class CompaniesService {
     };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} company`;
+  async findOne(id: string) {
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      let data = await this.companyModel.findById({
+        _id: id,
+      });
+      return data;
+    } else {
+      throw new BadRequestException('Not found company');
+    }
   }
 
   async update(id: string, updateCompanyDto: UpdateCompanyDto, user: IUser) {
-    if (id.match(/^[0-9a-fA-F]{24}$/)) {
+    if (mongoose.Types.ObjectId.isValid(id)) {
       return await this.companyModel.updateOne(
         { _id: id },
         {
@@ -70,7 +78,7 @@ export class CompaniesService {
   }
 
   async remove(id: string, user: IUser) {
-    if (id.match(/^[0-9a-fA-F]{24}$/)) {
+    if (mongoose.Types.ObjectId.isValid(id)) {
       await this.companyModel.updateOne(
         { _id: id },
         {

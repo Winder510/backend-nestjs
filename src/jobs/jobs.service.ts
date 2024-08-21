@@ -6,6 +6,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Job, JobDocument } from './schemas/job.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import aqp from 'api-query-params';
+import mongoose from 'mongoose';
 
 @Injectable()
 export class JobsService {
@@ -66,7 +67,7 @@ export class JobsService {
   }
 
   async update(id: string, updateJobDto: UpdateJobDto, user: IUser) {
-    if (id.match(/^[0-9a-fA-F]{24}$/)) {
+    if (mongoose.Types.ObjectId.isValid(id)) {
       return await this.jobModel.updateOne(
         { _id: id },
         {
@@ -81,7 +82,7 @@ export class JobsService {
   }
 
   async remove(id: string, user: IUser) {
-    if (id.match(/^[0-9a-fA-F]{24}$/)) {
+    if (mongoose.Types.ObjectId.isValid(id)) {
       await this.jobModel.updateOne(
         { _id: id },
         {

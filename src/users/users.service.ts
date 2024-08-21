@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { CreateUserDto, RegisterUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User, UserDocument } from './schemas/user.schema';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { compareSync, genSaltSync, hashSync } from 'bcryptjs';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUser } from './users.interface';
@@ -97,7 +97,7 @@ export class UsersService {
   }
 
   async findOne(id: string) {
-    if (id.match(/^[0-9a-fA-F]{24}$/)) {
+    if (mongoose.Types.ObjectId.isValid(id)) {
       let user = await this.userModel
         .findOne({
           _id: id,
@@ -126,7 +126,7 @@ export class UsersService {
   }
 
   async remove(id: string, user: IUser) {
-    if (id.match(/^[0-9a-fA-F]{24}$/)) {
+    if (mongoose.Types.ObjectId.isValid(id)) {
       await this.userModel.updateOne(
         { _id: id },
         {
