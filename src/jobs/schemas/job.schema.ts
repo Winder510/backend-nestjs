@@ -9,7 +9,6 @@ export class Job {
   name: string;
 
   @Prop()
-  
   skills: string[];
 
   @Prop()
