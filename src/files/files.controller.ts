@@ -23,8 +23,7 @@ export class FilesController {
 
   @Post('upload')
   @ResponseMessage('Upload file')
-  @Public()
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('fileUpload'))
   uploadFile(
     @UploadedFile(
       new ParseFilePipeBuilder()
