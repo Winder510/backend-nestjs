@@ -31,7 +31,7 @@ export class ResumesController {
     @Query('pageSize') limit: string,
     @Query() qs: string,
   ) {
-    return this.resumesService.findAll(page, limit, qs);
+    return this.resumesService.findAll(+page, +limit, qs);
   }
 
   @Get(':id')

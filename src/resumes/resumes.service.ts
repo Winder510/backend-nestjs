@@ -40,8 +40,8 @@ export class ResumesService {
       createAt: data.createdAt,
     };
   }
-  async findAll(page: string, limit: string, qs: string) {
-    const { filter, sort, population } = aqp(qs);
+  async findAll(page: number, limit: number, qs: string) {
+    const { filter, sort, population, projection } = aqp(qs);
 
     delete filter.current;
     delete filter.pageSize;
@@ -52,12 +52,14 @@ export class ResumesService {
     const totalItems = (await this.resumeModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
 
+    console.log(totalItems, totalItems);
     const result = await this.resumeModel
       .find(filter)
       .skip(offset)
       .limit(defaultLimit)
       // @ts-ignore: Unreachable code error
       .sort(sort)
+      .select(projection as any)
       .populate(population)
       .exec();
     return {
