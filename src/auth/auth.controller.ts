@@ -4,8 +4,8 @@ import { Request, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public, ResponseMessage, User } from 'src/decorator/customize';
 import { LocalAuthGuard } from './local-auth.guard';
-import { IUser, IUserRegister } from 'src/users/users.interface';
-import { CreateUserDto, RegisterUserDto } from 'src/users/dto/create-user.dto';
+import { IUser } from 'src/users/users.interface';
+import { RegisterUserDto } from 'src/users/dto/create-user.dto';
 import { Response } from 'express';
 
 @Controller('auth')
@@ -29,8 +29,8 @@ export class AuthController {
 
   @ResponseMessage('Get user information')
   @Get('account')
-  handleGetAccount(@User() user: IUser) {
-    return { user };
+  async handleGetAccount(@User() user: IUser) {
+    return this.authService.getAccount(user);
   }
 
   @Public()

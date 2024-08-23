@@ -8,11 +8,14 @@ import { compareSync, genSaltSync, hashSync } from 'bcryptjs';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import { IUser } from './users.interface';
 import aqp from 'api-query-params';
+import { Role, RoleDocument } from 'src/roles/schemas/role.schema';
+import { USER_ROLE } from 'src/databases/sample';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: SoftDeleteModel<UserDocument>,
+    @InjectModel(Role.name) private roleModel: SoftDeleteModel<RoleDocument>,
   ) {}
 
   getHashPassword = (password: string) => {
@@ -53,9 +56,11 @@ export class UsersService {
         `Email: ${registerUserDto.email} đã tồn tại`,
       );
     }
+    const userRole = await this.roleModel.findOne({ name: USER_ROLE });
+
     let data = await this.userModel.create({
       ...registerUserDto,
-      role: 'USER',
+      role: userRole?._id,
       password: hashPassword,
     });
 
@@ -116,7 +121,9 @@ export class UsersService {
     }
   }
   findOneByUsername(username: string) {
-    return this.userModel.findOne({ email: username });
+    return this.userModel
+      .findOne({ email: username })
+      .populate({ path: 'role', select: { name: 1 } });
   }
 
   async update(updateUserDto: UpdateUserDto, user: IUser) {
@@ -162,6 +169,9 @@ export class UsersService {
     );
   };
   findUserByToken = async (refreshToken: string) => {
-    return await this.userModel.findOne({ refreshToken });
+    return (await this.userModel.findOne({ refreshToken })).populate({
+      path: 'role',
+      select: { name: 1 },
+    });
   };
 }

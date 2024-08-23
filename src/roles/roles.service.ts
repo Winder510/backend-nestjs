@@ -7,6 +7,7 @@ import { Role, RoleDocument } from './schemas/role.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
 import aqp from 'api-query-params';
 import mongoose from 'mongoose';
+import { ADMIN_ROLE } from 'src/databases/sample';
 
 @Injectable()
 export class RolesService {
@@ -64,10 +65,7 @@ export class RolesService {
   }
 
   async findOne(id: string) {
-    if (mongoose.Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('Trung ID');
-    }
-    let data = (await this.roleModel.findById(id)).populate({
+    let data = await this.roleModel.findById(id).populate({
       path: 'permissions',
       select: { _id: 1, apiPath: 1, name: 1, method: 1, module: 1 },
     });
@@ -94,7 +92,7 @@ export class RolesService {
   async remove(id: string, user: IUser) {
     if (mongoose.Types.ObjectId.isValid(id)) {
       const foundRole = await this.roleModel.findById(id);
-      if (foundRole.name === 'ADMIN') {
+      if (foundRole.name === ADMIN_ROLE) {
         throw new BadRequestException('Không thể xóa role admin');
       }
       await this.roleModel.updateOne(

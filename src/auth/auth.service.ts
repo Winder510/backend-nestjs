@@ -6,33 +6,39 @@ import { CreateUserDto, RegisterUserDto } from 'src/users/dto/create-user.dto';
 import { ConfigService } from '@nestjs/config';
 import ms from 'ms';
 import { Response } from 'express';
+import { RolesService } from 'src/roles/roles.service';
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
+    private roleService: RolesService,
     private jwtService: JwtService,
     private configService: ConfigService,
   ) {}
 
   async validateUser(username: string, pass: string): Promise<any> {
-    const user = (await this.usersService.findOneByUsername(username)).populate(
-      { path: 'role', select: { name: 1, permissions: 1 } },
-    );
+    const user = await this.usersService.findOneByUsername(username);
     if (user) {
-      const isValidPassword = this.usersService.isValidPassword(
+      const isValidPassword = await this.usersService.isValidPassword(
         pass,
-        (await user).password,
+        user.password,
       );
 
       if (isValidPassword) {
-        return user;
+        const userRole = user.role as any;
+        const tmp = await this.roleService.findOne(userRole._id);
+        const userObj = {
+          ...user.toObject(),
+          permissions: tmp?.permissions ?? [],
+        };
+        return userObj;
       }
     }
     return null;
   }
 
   async login(user: IUser, response: Response) {
-    const { _id, name, email, role } = user;
+    const { _id, name, email, role, permissions } = user;
     const payload = {
       sub: 'token login',
       iss: 'from server',
@@ -53,12 +59,11 @@ export class AuthService {
     });
     return {
       access_token: this.jwtService.sign(payload),
-      user: { _id, name, email, role },
+      user: { _id, name, email, role, permissions },
     };
   }
   async register(newUser: RegisterUserDto) {
     let data = await this.usersService.register({ ...newUser });
-
     return data;
   }
   createRefreshToken = (payload) => {
@@ -93,6 +98,10 @@ export class AuthService {
         // update user with refresh token
         await this.usersService.updateUserToken(refreshToken, _id.toString());
 
+        // get permissions
+        const userRole = role as any;
+        const tmp = await this.roleService.findOne(userRole._id);
+
         //set refresh token at cookies
         response.clearCookie('refresh_token');
 
@@ -102,7 +111,7 @@ export class AuthService {
         });
         return {
           access_token: this.jwtService.sign(payload),
-          user: { _id, name, email, role },
+          user: { _id, name, email, role, permissions: tmp?.permissions ?? [] },
         };
       } else {
         throw new BadRequestException('Refresh token không hợp lệ');
@@ -116,4 +125,10 @@ export class AuthService {
     response.clearCookie('refresh_token');
     return 'done';
   };
+
+  async getAccount(user: IUser) {
+    let list = this.roleService.findOne(user._id) as any;
+    user.permissions = (await list)?.permissions ?? [];
+    return { user };
+  }
 }
