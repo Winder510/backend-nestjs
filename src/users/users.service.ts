@@ -102,7 +102,14 @@ export class UsersService {
         .findOne({
           _id: id,
         })
-        .select('-password');
+        .select('-password')
+        .populate({
+          path: 'role',
+          select: {
+            name: 1,
+            _id: 1,
+          },
+        });
       return user;
     } else {
       return 'Not found user';
@@ -127,6 +134,10 @@ export class UsersService {
 
   async remove(id: string, user: IUser) {
     if (mongoose.Types.ObjectId.isValid(id)) {
+      const foundUser = this.userModel.findById(id);
+      if ((await foundUser).email === 'admin@gmail.com') {
+        throw new BadRequestException('Không thể xóa tài khoản admin');
+      }
       await this.userModel.updateOne(
         { _id: id },
         {

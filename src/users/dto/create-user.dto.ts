@@ -2,6 +2,7 @@ import { Type } from 'class-transformer';
 import {
   IsDefined,
   IsEmail,
+  IsMongoId,
   IsNotEmpty,
   IsNotEmptyObject,
   IsObject,
@@ -37,6 +38,7 @@ export class CreateUserDto {
   address: string;
 
   @IsNotEmpty({ message: 'role không được để trống' })
+  @IsMongoId({ message: 'role la mongo id' })
   role: string;
 
   @IsDefined()

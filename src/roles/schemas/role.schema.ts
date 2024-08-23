@@ -1,40 +1,22 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
-import { Role } from 'src/roles/schemas/role.schema';
+import { Permission } from 'src/permissions/schemas/permission.schema';
 
-export type UserDocument = HydratedDocument<User>;
+export type RoleDocument = HydratedDocument<Role>;
 
 @Schema({ timestamps: true })
-export class User {
-  @Prop({ required: true })
-  email: string;
-
-  @Prop({ required: true })
-  password: string;
-
-  @Prop()
-  address: string;
-
+export class Role {
   @Prop()
   name: string;
 
   @Prop()
-  age: string;
+  description: string;
 
   @Prop()
-  gender: string;
+  isActive: boolean;
 
-  @Prop({ type: Object })
-  company: {
-    _id: mongoose.Schema.Types.ObjectId;
-    name: string;
-  };
-
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: Role.name })
-  role: string;
-
-  @Prop()
-  refreshToken: string;
+  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Permission' }] })
+  permissions: Permission[];
 
   @Prop({ type: Object })
   createdBy: {
@@ -66,4 +48,4 @@ export class User {
   @Prop()
   deletedAt: Date;
 }
-export const UserSchema = SchemaFactory.createForClass(User);
+export const RoleSchema = SchemaFactory.createForClass(Role);

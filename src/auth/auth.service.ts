@@ -15,11 +15,13 @@ export class AuthService {
   ) {}
 
   async validateUser(username: string, pass: string): Promise<any> {
-    const user = await this.usersService.findOneByUsername(username);
+    const user = (await this.usersService.findOneByUsername(username)).populate(
+      { path: 'role', select: { name: 1, permissions: 1 } },
+    );
     if (user) {
       const isValidPassword = this.usersService.isValidPassword(
         pass,
-        user.password,
+        (await user).password,
       );
 
       if (isValidPassword) {

@@ -1,7 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateResumeDto, CreateUserCvDto } from './dto/create-resume.dto';
-import { UpdateResumeDto } from './dto/update-resume.dto';
-import { ResumesModule } from './resumes.module';
 import { Resume, ResumeDocument } from './schemas/resume.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
@@ -52,7 +50,6 @@ export class ResumesService {
     const totalItems = (await this.resumeModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
 
-    console.log(totalItems, totalItems);
     const result = await this.resumeModel
       .find(filter)
       .skip(offset)
@@ -118,6 +115,18 @@ export class ResumesService {
     }
   }
   async findByUser(user: IUser) {
-    return await this.resumeModel.find({ userId: user._id });
+    return await this.resumeModel
+      .find({ userId: user._id })
+      .sort('-createdAt')
+      .populate([
+        {
+          path: 'companyId',
+          select: { name: 1 },
+        },
+        {
+          path: 'jobId',
+          select: { name: 1 },
+        },
+      ]);
   }
 }
