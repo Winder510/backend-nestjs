@@ -126,9 +126,9 @@ export class UsersService {
       .populate({ path: 'role', select: { name: 1 } });
   }
 
-  async update(updateUserDto: UpdateUserDto, user: IUser) {
+  async update(id: string, updateUserDto: UpdateUserDto, user: IUser) {
     return await this.userModel.updateOne(
-      { id: updateUserDto._id },
+      { _id: id },
       {
         ...updateUserDto,
         updatedBy: {
@@ -142,7 +142,7 @@ export class UsersService {
   async remove(id: string, user: IUser) {
     if (mongoose.Types.ObjectId.isValid(id)) {
       const foundUser = this.userModel.findById(id);
-      if ((await foundUser).email === 'admin@gmail.com') {
+      if (foundUser && (await foundUser).email === 'admin@gmail.com') {
         throw new BadRequestException('Không thể xóa tài khoản admin');
       }
       await this.userModel.updateOne(

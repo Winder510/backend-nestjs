@@ -29,7 +29,7 @@ export class UsersController {
   findAll(
     @Query('current') page: string,
     @Query('pageSize') limit: string,
-    @Query() qs: string,  
+    @Query() qs: string,
   ) {
     return this.usersService.findAll(+page, +limit, qs);
   }
@@ -40,11 +40,14 @@ export class UsersController {
     return this.usersService.findOne(id);
   }
 
-  @Patch()
+  @Patch(':id')
   @ResponseMessage('Update a user')
-  update(@Body() updateUserDto: UpdateUserDto, @User() user: IUser) {
-    console.log(updateUserDto);
-    return this.usersService.update(updateUserDto, user);
+  update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @User() user: IUser,
+  ) {
+    return this.usersService.update(id, updateUserDto, user);
   }
 
   @Delete(':id')
