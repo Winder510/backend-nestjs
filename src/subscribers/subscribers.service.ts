@@ -67,23 +67,18 @@ export class SubscribersService {
     return data;
   }
 
-  async update(
-    id: string,
-    updateSubscriberDto: UpdateSubscriberDto,
-    user: IUser,
-  ) {
-    if (mongoose.Types.ObjectId.isValid(id)) {
-      return await this.subcriberModel.updateOne(
-        { _id: id },
-        {
-          ...updateSubscriberDto,
-          updatedBy: {
-            _id: user._id,
-            email: user.email,
-          },
+  async update(updateSubscriberDto: UpdateSubscriberDto, user: IUser) {
+    return await this.subcriberModel.updateOne(
+      { email: user.email },
+      {
+        ...updateSubscriberDto,
+        updatedBy: {
+          _id: user._id,
+          email: user.email,
         },
-      );
-    }
+      },
+      { upsert: true },
+    );
   }
 
   async remove(id: string, user: IUser) {
@@ -98,5 +93,11 @@ export class SubscribersService {
     } else {
       return 'Not found Subcriber';
     }
+  }
+  async getSkills(user: IUser) {
+    return await this.subcriberModel.findOne(
+      { email: user.email },
+      { skils: 1 },
+    );
   }
 }

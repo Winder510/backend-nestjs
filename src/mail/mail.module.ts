@@ -5,8 +5,19 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { MongooseModule } from '@nestjs/mongoose';
+import { Job, JobSchema } from 'src/jobs/schemas/job.schema';
+import {
+  Subcriber,
+  SubcriberSchema,
+} from 'src/subscribers/schemas/subscriber.schema';
 @Module({
   imports: [
+    MongooseModule.forFeature([
+      { name: Job.name, schema: JobSchema },
+      { name: Subcriber.name, schema: SubcriberSchema },
+    ]),
+
     MailerModule.forRootAsync({
       useFactory: async (configService: ConfigService) => ({
         transport: {
