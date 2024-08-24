@@ -1,22 +1,23 @@
 import { Injectable } from '@nestjs/common';
-import { CreateJobDto } from './dto/create-job.dto';
-import { UpdateJobDto } from './dto/update-job.dto';
-import { IUser } from 'src/users/users.interface';
+import { CreateSubscriberDto } from './dto/create-subscriber.dto';
+import { UpdateSubscriberDto } from './dto/update-subscriber.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Job, JobDocument } from './schemas/job.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
+import { Subcriber, SubcriberDocument } from './schemas/subscriber.schema';
+import { IUser } from 'src/users/users.interface';
 import aqp from 'api-query-params';
 import mongoose from 'mongoose';
 
 @Injectable()
-export class JobsService {
+export class SubscribersService {
   constructor(
-    @InjectModel(Job.name) private jobModel: SoftDeleteModel<JobDocument>,
+    @InjectModel(Subcriber.name)
+    private subcriberModel: SoftDeleteModel<SubcriberDocument>,
   ) {}
 
-  async create(createJobDto: CreateJobDto, user: IUser) {
-    let data = await this.jobModel.create({
-      ...createJobDto,
+  async create(createSubscriberDto: CreateSubscriberDto, user: IUser) {
+    let data = await this.subcriberModel.create({
+      ...createSubscriberDto,
       createdBy: {
         _id: user._id,
         email: user.email,
@@ -37,10 +38,10 @@ export class JobsService {
     let offset = (+page - 1) * +limit;
     let defaultLimit = +limit ? +limit : 10;
 
-    const totalItems = (await this.jobModel.find(filter)).length;
+    const totalItems = (await this.subcriberModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
 
-    const result = await this.jobModel
+    const result = await this.subcriberModel
       .find(filter)
       .skip(offset)
       .limit(defaultLimit)
@@ -60,18 +61,22 @@ export class JobsService {
   }
 
   async findOne(id: string) {
-    let data = await this.jobModel.findOne({
+    let data = await this.subcriberModel.findOne({
       _id: id,
     });
     return data;
   }
 
-  async update(id: string, updateJobDto: UpdateJobDto, user: IUser) {
+  async update(
+    id: string,
+    updateSubscriberDto: UpdateSubscriberDto,
+    user: IUser,
+  ) {
     if (mongoose.Types.ObjectId.isValid(id)) {
-      return await this.jobModel.updateOne(
+      return await this.subcriberModel.updateOne(
         { _id: id },
         {
-          ...updateJobDto,
+          ...updateSubscriberDto,
           updatedBy: {
             _id: user._id,
             email: user.email,
@@ -83,15 +88,15 @@ export class JobsService {
 
   async remove(id: string, user: IUser) {
     if (mongoose.Types.ObjectId.isValid(id)) {
-      await this.jobModel.updateOne(
+      await this.subcriberModel.updateOne(
         { _id: id },
         {
           deletedBy: { _id: user._id, email: user.email },
         },
       );
-      return this.jobModel.softDelete({ _id: id });
+      return this.subcriberModel.softDelete({ _id: id });
     } else {
-      return 'Not found user';
+      return 'Not found Subcriber';
     }
   }
 }

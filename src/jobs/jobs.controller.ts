@@ -32,7 +32,7 @@ export class JobsController {
     @Query('pageSize') limit: string,
     @Query() qs: string,
   ) {
-    return this.jobsService.findAll(page, limit, qs);
+    return this.jobsService.findAll(+page, +limit, qs);
   }
 
   @Get(':id')
