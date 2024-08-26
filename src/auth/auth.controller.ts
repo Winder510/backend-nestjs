@@ -30,7 +30,7 @@ export class AuthController {
   @ResponseMessage('Get user information')
   @Get('account')
   async handleGetAccount(@User() user: IUser) {
-    return this.authService.getAccount(user);
+    return await this.authService.getAccount(user);
   }
 
   @Public()

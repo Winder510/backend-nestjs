@@ -127,8 +127,8 @@ export class AuthService {
   };
 
   async getAccount(user: IUser) {
-    let list = this.roleService.findOne(user._id) as any;
-    user.permissions = (await list)?.permissions ?? [];
+    let list = (await this.roleService.findOne(user.role._id)) as any;
+    user.permissions = list?.permissions ?? [];
     return { user };
   }
 }

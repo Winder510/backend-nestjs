@@ -49,7 +49,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       );
     });
 
-    if (targetEndPoint.startsWith('api/v1/auth')) {
+    if (targetEndPoint.startsWith('/api/v1/auth')) {
       isExist = true;
     }
 
