@@ -29,6 +29,7 @@ export class CreateJobDto {
   @ArrayMinSize(1)
   skills: string[];
 
+  @IsNotEmpty()
   location: string;
 
   @IsNotEmpty()
@@ -48,6 +49,8 @@ export class CreateJobDto {
 
   @IsNotEmpty()
   endDate: Date;
+  @IsNotEmpty()
+  isActive: Date;
 
   @IsDefined()
   @IsNotEmptyObject()
