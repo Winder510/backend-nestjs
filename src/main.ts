@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { TransformInterceptor } from './core/transform.intercepter';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
@@ -41,6 +42,7 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
+  app.use(helmet());
   await app.listen(configService.get('PORT'));
 }
 

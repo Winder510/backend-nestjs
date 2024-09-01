@@ -32,7 +32,7 @@ export class CreateJobDto {
   location: string;
 
   @IsNotEmpty()
-  salary: number;
+  salary: string;
 
   @IsNotEmpty()
   quantity: number;

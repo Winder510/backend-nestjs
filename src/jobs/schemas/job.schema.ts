@@ -15,7 +15,7 @@ export class Job {
   location: string;
 
   @Prop()
-  salary: number;
+  salary: string;
 
   @Prop()
   quantity: number;

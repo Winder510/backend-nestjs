@@ -7,6 +7,7 @@ import { LocalAuthGuard } from './local-auth.guard';
 import { IUser } from 'src/users/users.interface';
 import { RegisterUserDto } from 'src/users/dto/create-user.dto';
 import { Response } from 'express';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
@@ -14,6 +15,7 @@ export class AuthController {
 
   @Public()
   @UseGuards(LocalAuthGuard)
+  @UseGuards(ThrottlerGuard)
   @ResponseMessage('User login')
   @Post('login')
   handleLogin(@Request() req, @Res({ passthrough: true }) response: Response) {
