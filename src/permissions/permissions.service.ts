@@ -34,7 +34,7 @@ export class PermissionsService {
     };
   }
 
-  async findAll(page: string, limit: string, qs: string) {
+  async findAll(page: number, limit: number, qs: string) {
     const { filter, sort, population } = aqp(qs);
 
     delete filter.current;
