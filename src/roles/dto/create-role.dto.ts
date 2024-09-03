@@ -18,14 +18,14 @@ export class CreateRoleDto {
   @IsNotEmpty()
   isActive: boolean;
 
+  // @ArrayNotEmpty({ message: 'Permissions array cannot be empty' })
+  // @ArrayMinSize(1, {
+  //   message: 'Permissions array must have at least 1 element',
+  // })
+  // @ArrayMaxSize(10, {
+  //   message: 'Permissions array must not have more than 10 elements',
+  // })
   @IsArray()
-  @ArrayNotEmpty({ message: 'Permissions array cannot be empty' })
-  @ArrayMinSize(1, {
-    message: 'Permissions array must have at least 1 element',
-  })
-  @ArrayMaxSize(10, {
-    message: 'Permissions array must not have more than 10 elements',
-  })
   @IsMongoId({
     each: true,
     message: 'Each permission must be a valid ObjectId',

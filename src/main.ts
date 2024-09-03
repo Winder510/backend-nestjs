@@ -42,7 +42,6 @@ async function bootstrap() {
 
   app.use(cookieParser());
 
-  app.use(helmet());
   await app.listen(configService.get('PORT'));
 }
 
